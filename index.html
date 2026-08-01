@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>LOUKA — Master Virtuoso Violinist</title>
   
   <!-- Official FontAwesome Icons -->
@@ -27,6 +27,7 @@
       margin: 0;
       padding: 0;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -41,7 +42,7 @@
       position: relative;
     }
 
-    /* Particle Canvas Background */
+    /* Background Particle Canvas */
     #canvas-bg {
       position: absolute;
       top: 0;
@@ -96,7 +97,7 @@
       box-shadow: 0 0 80px rgba(245, 158, 11, 0.7), inset 0 0 30px rgba(245, 158, 11, 0.4);
     }
 
-    /* Main Royal Glass Card */
+    /* Main Royal Glass Card Wrapper */
     .card-wrapper {
       position: relative;
       z-index: 10;
@@ -198,11 +199,11 @@
       transform: scale(1.2);
     }
 
-    /* Louka Profile Picture Frame */
+    /* Louka Photo Avatar Frame */
     .profile-avatar-container {
       position: relative;
-      width: 125px;
-      height: 125px;
+      width: 130px;
+      height: 130px;
       margin: 0 auto 20px;
     }
 
@@ -212,13 +213,13 @@
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid var(--gold-royal);
-      box-shadow: 0 0 35px rgba(245, 158, 11, 0.5), inset 0 0 15px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 35px rgba(245, 158, 11, 0.5);
     }
 
     .violin-mini-badge {
       position: absolute;
       bottom: -2px;
-      right: 0px;
+      right: 2px;
       width: 36px;
       height: 36px;
       background: radial-gradient(circle, var(--gold-royal), #b45309);
@@ -269,7 +270,7 @@
       margin-bottom: 25px;
     }
 
-    /* Pro Buttons */
+    /* Social Links */
     .links-group {
       display: flex;
       flex-direction: column;
@@ -352,11 +353,69 @@
       color: rgba(255, 255, 255, 0.3);
       letter-spacing: 3px;
     }
+
+    /* ----------------------------------------------------
+       PHONE MODE (RESPONSIVE FOR MOBILE DEVICES)
+    ---------------------------------------------------- */
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+        align-items: flex-start;
+        overflow-y: auto;
+      }
+
+      .card-wrapper {
+        padding: 0;
+        max-width: 100%;
+        margin: 20px 0;
+      }
+
+      .card {
+        padding: 30px 20px 25px;
+        border-radius: 28px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9);
+      }
+
+      h1 {
+        font-size: 1.9rem;
+      }
+
+      .subtitle {
+        font-size: 0.7rem;
+        letter-spacing: 3px;
+        margin-bottom: 15px;
+      }
+
+      .profile-avatar-container {
+        width: 110px;
+        height: 110px;
+      }
+
+      .desc {
+        font-size: 0.82rem;
+        margin-bottom: 20px;
+      }
+
+      .master-btn {
+        padding: 18px 32px;
+        font-size: 0.95rem;
+        letter-spacing: 2px;
+      }
+
+      .social-link {
+        padding: 14px 18px;
+        font-size: 0.9rem;
+      }
+
+      .volume-slider {
+        width: 90px;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Background Particle Canvas -->
+  <!-- Background Canvas -->
   <canvas id="canvas-bg"></canvas>
 
   <!-- Cinema Entry Overlay -->
@@ -391,9 +450,9 @@
         <input type="range" id="volume-range" class="volume-slider" min="0" max="1" step="0.01" value="0.7">
       </div>
 
-      <!-- Louka Photo Avatar Badge -->
+      <!-- Louka Image Avatar -->
       <div class="profile-avatar-container">
-        <img src="https://images2.imgbox.com/ce/74/Wf4hUj8T_o.jpg" alt="Louka Violinist" class="profile-avatar" />
+        <img src="SaveInta.com_656279299_17851941351691096_3504055883932409062_n.jpg" alt="Louka Violinist" class="profile-avatar" />
         <div class="violin-mini-badge">
           <i class="fa-solid fa-violin"></i>
         </div>
@@ -441,7 +500,7 @@
     const volumeRange = document.getElementById('volume-range');
     const volumeIcon = document.getElementById('volume-icon');
 
-    // Volume Slider Control
+    // Volume Control
     volumeRange.addEventListener('input', (e) => {
       const val = e.target.value;
       audio.volume = val;
@@ -522,20 +581,22 @@
     }
     animateParticles();
 
-    // --- 3D TILT ---
+    // --- 3D TILT FOR DESKTOP & TOUCH FOR MOBILE ---
     const cardWrapper = document.getElementById('card-wrapper');
     const card = document.getElementById('card');
 
-    cardWrapper.addEventListener('mousemove', (e) => {
-      const rect = cardWrapper.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      card.style.transform = `rotateY(${x / 18}deg) rotateX(${-y / 18}deg)`;
-    });
+    if (window.innerWidth > 600) {
+      cardWrapper.addEventListener('mousemove', (e) => {
+        const rect = cardWrapper.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        card.style.transform = `rotateY(${x / 18}deg) rotateX(${-y / 18}deg)`;
+      });
 
-    cardWrapper.addEventListener('mouseleave', () => {
-      card.style.transform = `rotateY(0deg) rotateX(0deg)`;
-    });
+      cardWrapper.addEventListener('mouseleave', () => {
+        card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+      });
+    }
   </script>
 </body>
 </html>

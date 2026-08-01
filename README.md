@@ -1,1 +1,541 @@
-# loukaa
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LOUKA — Master Virtuoso Violinist</title>
+  
+  <!-- Official FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Elite Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --gold-royal: #f59e0b;
+      --gold-glow: #fbbf24;
+      --gold-light: #fef08a;
+      --bg-dark: #030206;
+      --purple-royal: #6d28d9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Particle Canvas Background */
+    #canvas-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Cinema Entry Overlay */
+    #hero-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(12, 10, 20, 0.95), #020204);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(30px);
+      transition: all 1s cubic-bezier(0.77, 0, 0.175, 1);
+      cursor: pointer;
+    }
+
+    #hero-overlay.enter-done {
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(1.1);
+      pointer-events: none;
+    }
+
+    .master-btn {
+      position: relative;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(109, 40, 217, 0.25));
+      border: 1.5px solid var(--gold-royal);
+      padding: 24px 50px;
+      border-radius: 60px;
+      color: #fff;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.2rem;
+      letter-spacing: 4px;
+      box-shadow: 0 0 50px rgba(245, 158, 11, 0.35), inset 0 0 20px rgba(245, 158, 11, 0.2);
+      transition: all 0.4s ease;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .master-btn:hover {
+      transform: scale(1.08);
+      border-color: var(--gold-light);
+      box-shadow: 0 0 80px rgba(245, 158, 11, 0.7), inset 0 0 30px rgba(245, 158, 11, 0.4);
+    }
+
+    /* Main Royal Glass Card */
+    .card-wrapper {
+      position: relative;
+      z-index: 10;
+      perspective: 1000px;
+      padding: 20px;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .card {
+      background: rgba(13, 11, 20, 0.65);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 36px;
+      padding: 40px 35px 35px;
+      text-align: center;
+      box-shadow: 0 30px 100px rgba(0, 0, 0, 0.9), 
+                  0 0 50px rgba(109, 40, 217, 0.2),
+                  inset 0 0 25px rgba(245, 158, 11, 0.1);
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+    }
+
+    /* Sound Visualizer Bar */
+    .equalizer {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 4px;
+      height: 22px;
+      margin-bottom: 15px;
+    }
+
+    .eq-bar {
+      width: 3px;
+      background: var(--gold-royal);
+      border-radius: 3px;
+      height: 6px;
+      transition: height 0.15s ease;
+    }
+
+    .playing .eq-bar:nth-child(1) { animation: eq 0.6s infinite alternate; }
+    .playing .eq-bar:nth-child(2) { animation: eq 0.8s infinite 0.2s alternate; }
+    .playing .eq-bar:nth-child(3) { animation: eq 0.5s infinite 0.4s alternate; }
+    .playing .eq-bar:nth-child(4) { animation: eq 0.9s infinite 0.1s alternate; }
+    .playing .eq-bar:nth-child(5) { animation: eq 0.7s infinite 0.3s alternate; }
+
+    @keyframes eq {
+      0% { height: 4px; opacity: 0.3; }
+      100% { height: 22px; opacity: 1; background: var(--gold-light); box-shadow: 0 0 10px var(--gold-royal); }
+    }
+
+    /* Interactive Volume Control Bar */
+    .volume-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 30px;
+      padding: 8px 18px;
+      margin: 0 auto 20px;
+      width: fit-content;
+      backdrop-filter: blur(10px);
+    }
+
+    .volume-box i {
+      color: var(--gold-royal);
+      font-size: 0.9rem;
+      width: 16px;
+      cursor: pointer;
+    }
+
+    .volume-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 110px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--gold-royal);
+      box-shadow: 0 0 10px var(--gold-glow);
+      transition: transform 0.1s ease;
+    }
+
+    .volume-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Louka Profile Picture Frame */
+    .profile-avatar-container {
+      position: relative;
+      width: 125px;
+      height: 125px;
+      margin: 0 auto 20px;
+    }
+
+    .profile-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--gold-royal);
+      box-shadow: 0 0 35px rgba(245, 158, 11, 0.5), inset 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .violin-mini-badge {
+      position: absolute;
+      bottom: -2px;
+      right: 0px;
+      width: 36px;
+      height: 36px;
+      background: radial-gradient(circle, var(--gold-royal), #b45309);
+      border: 2px solid #000;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 15px var(--gold-glow);
+    }
+
+    .violin-mini-badge i {
+      color: #fff;
+      font-size: 1.1rem;
+    }
+
+    h1 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      background: linear-gradient(180deg, #ffffff 40%, var(--gold-royal) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--gold-glow);
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .desc {
+      color: #a1a1aa;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 25px;
+      font-weight: 300;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.4), transparent);
+      margin-bottom: 25px;
+    }
+
+    /* Pro Buttons */
+    .links-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .social-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-radius: 22px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .link-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .link-left i {
+      font-size: 1.5rem;
+    }
+
+    .tiktok-vip {
+      background: rgba(8, 8, 12, 0.85);
+      border-color: rgba(0, 242, 254, 0.3);
+    }
+
+    .tiktok-vip i {
+      color: #00f2fe;
+      text-shadow: -2px 0 #ff0050, 0 0 10px #00f2fe;
+    }
+
+    .tiktok-vip:hover {
+      transform: translateY(-5px) scale(1.02);
+      border-color: #00f2fe;
+      box-shadow: 0 15px 35px rgba(0, 242, 254, 0.3);
+    }
+
+    .insta-vip {
+      background: linear-gradient(135deg, rgba(240, 148, 51, 0.25), rgba(225, 48, 108, 0.25), rgba(188, 24, 136, 0.25));
+      border-color: rgba(225, 48, 108, 0.4);
+    }
+
+    .insta-vip i {
+      background: linear-gradient(45deg, #f09433, #e1306c, #bc1888);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 8px #e1306c);
+    }
+
+    .insta-vip:hover {
+      transform: translateY(-5px) scale(1.02);
+      border-color: #e1306c;
+      box-shadow: 0 15px 35px rgba(225, 48, 108, 0.4);
+    }
+
+    .arrow-icon {
+      font-size: 0.85rem;
+      color: var(--gold-royal);
+      transition: transform 0.3s ease;
+    }
+
+    .social-link:hover .arrow-icon {
+      transform: translateX(8px);
+    }
+
+    footer {
+      margin-top: 30px;
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Particle Canvas -->
+  <canvas id="canvas-bg"></canvas>
+
+  <!-- Cinema Entry Overlay -->
+  <div id="hero-overlay" onclick="launchExperience()">
+    <div class="master-btn">
+      <i class="fa-solid fa-play"></i>
+      <span>ENTER EXPERIENCE</span>
+    </div>
+  </div>
+
+  <!-- Audio Track -->
+  <audio id="violin-audio" loop crossorigin="anonymous" preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=sad-violin-112260.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Main Card -->
+  <div class="card-wrapper" id="card-wrapper">
+    <div class="card" id="card">
+      
+      <!-- Equalizer Animated Bar -->
+      <div class="equalizer" id="equalizer">
+        <div class="eq-bar"></div>
+        <div class="eq-bar"></div>
+        <div class="eq-bar"></div>
+        <div class="eq-bar"></div>
+        <div class="eq-bar"></div>
+      </div>
+
+      <!-- Interactive Volume Controller -->
+      <div class="volume-box">
+        <i class="fa-solid fa-volume-high" id="volume-icon"></i>
+        <input type="range" id="volume-range" class="volume-slider" min="0" max="1" step="0.01" value="0.7">
+      </div>
+
+      <!-- Louka Photo Avatar Badge -->
+      <div class="profile-avatar-container">
+        <img src="https://images2.imgbox.com/ce/74/Wf4hUj8T_o.jpg" alt="Louka Violinist" class="profile-avatar" />
+        <div class="violin-mini-badge">
+          <i class="fa-solid fa-violin"></i>
+        </div>
+      </div>
+
+      <!-- Content Info -->
+      <h1>LOUKA</h1>
+      <div class="subtitle">Virtuoso Violinist</div>
+
+      <p class="desc">
+        Exclusive live violin performances, classical masterpieces & elegant acoustic interpretations for elite events.
+      </p>
+
+      <div class="divider"></div>
+
+      <!-- Contact Links -->
+      <div class="links-group">
+        <a href="https://www.tiktok.com/@__louka__musique__?_r=1&_t=ZS-98VNWT1w67h" target="_blank" class="social-link tiktok-vip">
+          <div class="link-left">
+            <i class="fa-brands fa-tiktok"></i>
+            <span>Official TikTok</span>
+          </div>
+          <i class="fa-solid fa-chevron-right arrow-icon"></i>
+        </a>
+
+        <a href="https://instagram.com" target="_blank" class="social-link insta-vip">
+          <div class="link-left">
+            <i class="fa-brands fa-instagram"></i>
+            <span>Official Instagram</span>
+          </div>
+          <i class="fa-solid fa-chevron-right arrow-icon"></i>
+        </a>
+      </div>
+
+      <footer>
+        © 2026 LOUKA MUSIC — ALL RIGHTS RESERVED
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const audio = document.getElementById('violin-audio');
+    const overlay = document.getElementById('hero-overlay');
+    const equalizer = document.getElementById('equalizer');
+    const volumeRange = document.getElementById('volume-range');
+    const volumeIcon = document.getElementById('volume-icon');
+
+    // Volume Slider Control
+    volumeRange.addEventListener('input', (e) => {
+      const val = e.target.value;
+      audio.volume = val;
+      
+      if (val == 0) {
+        volumeIcon.className = 'fa-solid fa-volume-xmark';
+      } else if (val < 0.5) {
+        volumeIcon.className = 'fa-solid fa-volume-low';
+      } else {
+        volumeIcon.className = 'fa-solid fa-volume-high';
+      }
+    });
+
+    // Mute/Unmute toggle
+    volumeIcon.addEventListener('click', () => {
+      if (audio.volume > 0) {
+        audio.dataset.oldVol = audio.volume;
+        audio.volume = 0;
+        volumeRange.value = 0;
+        volumeIcon.className = 'fa-solid fa-volume-xmark';
+      } else {
+        const restoreVal = audio.dataset.oldVol || 0.7;
+        audio.volume = restoreVal;
+        volumeRange.value = restoreVal;
+        volumeIcon.className = restoreVal < 0.5 ? 'fa-solid fa-volume-low' : 'fa-solid fa-volume-high';
+      }
+    });
+
+    function launchExperience() {
+      overlay.classList.add('enter-done');
+      equalizer.classList.add('playing');
+      audio.volume = volumeRange.value;
+      audio.play().catch(err => console.log("Audio play prevented:", err));
+    }
+
+    // --- CANVAS PARTICLES ---
+    const canvas = document.getElementById('canvas-bg');
+    const ctx = canvas.getContext('2d');
+    
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const particles = [];
+    for(let i=0; i<70; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 2 + 0.5,
+        speedX: (Math.random() - 0.5) * 0.5,
+        speedY: (Math.random() - 0.5) * 0.5,
+        alpha: Math.random() * 0.7 + 0.2
+      });
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.x += p.speedX;
+        p.y += p.speedY;
+
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(245, 158, 11, ${p.alpha})`;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#f59e0b';
+        ctx.fill();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // --- 3D TILT ---
+    const cardWrapper = document.getElementById('card-wrapper');
+    const card = document.getElementById('card');
+
+    cardWrapper.addEventListener('mousemove', (e) => {
+      const rect = cardWrapper.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      card.style.transform = `rotateY(${x / 18}deg) rotateX(${-y / 18}deg)`;
+    });
+
+    cardWrapper.addEventListener('mouseleave', () => {
+      card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+    });
+  </script>
+</body>
+</html>

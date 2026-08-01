@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="html-root">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -11,7 +11,7 @@
   <!-- Elite Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cairo:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
   <style>
     /* Default Dark Mode Variables */
@@ -30,7 +30,7 @@
       --shadow-color: rgba(0, 0, 0, 0.9);
     }
 
-    /* Daytime Theme Variables (Triggered via JS or Toggle) */
+    /* Daytime Theme Variables */
     body.light-theme {
       --bg-dark: #f8fafc;
       --card-bg: rgba(255, 255, 255, 0.75);
@@ -56,13 +56,26 @@
     body {
       background-color: var(--bg-dark);
       color: var(--text-main);
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', 'Cairo', sans-serif;
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
       overflow-x: hidden;
       position: relative;
+    }
+
+    /* RTL Arabic Font Adjustments */
+    [dir="rtl"] body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+    }
+
+    [dir="rtl"] .arrow-icon {
+      transform: scaleX(-1);
+    }
+    
+    [dir="rtl"] .social-link:hover .arrow-icon {
+      transform: scaleX(-1) translateX(8px);
     }
 
     /* Background Canvas */
@@ -73,6 +86,39 @@
       width: 100%;
       height: 100%;
       z-index: 1;
+    }
+
+    /* Language Switcher Dropdown */
+    .lang-switcher {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--gold-royal);
+      padding: 6px 12px;
+      border-radius: 30px;
+      backdrop-filter: blur(15px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .lang-switcher select {
+      background: transparent;
+      border: none;
+      color: var(--gold-royal);
+      font-weight: 700;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .lang-switcher select option {
+      background: var(--bg-dark);
+      color: var(--text-main);
     }
 
     /* Manual Theme Switch Button */
@@ -129,7 +175,7 @@
       padding: 24px 50px;
       border-radius: 60px;
       color: var(--text-main);
-      font-family: 'Cinzel Decorative', serif;
+      font-family: 'Cinzel Decorative', 'Cairo', serif;
       font-size: 1.2rem;
       letter-spacing: 4px;
       box-shadow: 0 0 50px rgba(245, 158, 11, 0.35), inset 0 0 20px rgba(245, 158, 11, 0.2);
@@ -274,6 +320,11 @@
       box-shadow: 0 0 15px var(--gold-glow);
     }
 
+    [dir="rtl"] .violin-mini-badge {
+      right: auto;
+      left: 2px;
+    }
+
     .violin-mini-badge i {
       color: #fff;
       font-size: 1.1rem;
@@ -409,7 +460,7 @@
       .card-wrapper {
         padding: 0;
         max-width: 100%;
-        margin: 40px 0 20px;
+        margin: 50px 0 20px;
       }
 
       .card {
@@ -423,10 +474,21 @@
       .desc { font-size: 0.82rem; }
       .master-btn { padding: 18px 32px; font-size: 0.95rem; }
       .theme-toggle-btn { top: 10px; right: 10px; padding: 8px 12px; font-size: 0.75rem; }
+      .lang-switcher { top: 10px; left: 10px; padding: 4px 8px; }
     }
   </style>
 </head>
 <body>
+
+  <!-- Language Switcher Selector -->
+  <div class="lang-switcher">
+    <i class="fa-solid fa-globe"></i>
+    <select id="lang-select" onchange="changeLanguage(this.value)">
+      <option value="en">EN</option>
+      <option value="fr">FR</option>
+      <option value="ar">AR</option>
+    </select>
+  </div>
 
   <!-- Theme Toggle Button -->
   <button class="theme-toggle-btn" id="theme-btn" onclick="toggleTheme()">
@@ -441,7 +503,7 @@
   <div id="hero-overlay" onclick="launchExperience()">
     <div class="master-btn">
       <i class="fa-solid fa-play"></i>
-      <span>ENTER EXPERIENCE</span>
+      <span id="txt-overlay">ENTER EXPERIENCE</span>
     </div>
   </div>
 
@@ -479,9 +541,9 @@
 
       <!-- Information -->
       <h1>LOUKA</h1>
-      <div class="subtitle">Virtuoso Violinist</div>
+      <div class="subtitle" id="txt-subtitle">Virtuoso Violinist</div>
 
-      <p class="desc">
+      <p class="desc" id="txt-desc">
         Exclusive live violin performances, classical masterpieces & elegant acoustic interpretations for elite events.
       </p>
 
@@ -492,7 +554,7 @@
         <a href="https://www.tiktok.com/@__louka__musique__?_r=1&_t=ZS-98VNWT1w67h" target="_blank" class="social-link tiktok-vip">
           <div class="link-left">
             <i class="fa-brands fa-tiktok"></i>
-            <span>Official TikTok</span>
+            <span id="txt-tiktok">Official TikTok</span>
           </div>
           <i class="fa-solid fa-chevron-right arrow-icon"></i>
         </a>
@@ -500,13 +562,13 @@
         <a href="https://instagram.com" target="_blank" class="social-link insta-vip">
           <div class="link-left">
             <i class="fa-brands fa-instagram"></i>
-            <span>Official Instagram</span>
+            <span id="txt-insta">Official Instagram</span>
           </div>
           <i class="fa-solid fa-chevron-right arrow-icon"></i>
         </a>
       </div>
 
-      <footer>
+      <footer id="txt-footer">
         © 2026 LOUKA MUSIC — ALL RIGHTS RESERVED
       </footer>
     </div>
@@ -521,33 +583,95 @@
     const themeBtn = document.getElementById('theme-btn');
     const themeIcon = document.getElementById('theme-icon');
     const themeText = document.getElementById('theme-text');
+    const htmlRoot = document.getElementById('html-root');
 
-    // --- TIME-BASED AUTOMATIC THEME SYSTEM ---
+    // --- TRANSLATION DATA ---
+    const translations = {
+      en: {
+        overlay: "ENTER EXPERIENCE",
+        subtitle: "Virtuoso Violinist",
+        desc: "Exclusive live violin performances, classical masterpieces & elegant acoustic interpretations for elite events.",
+        tiktok: "Official TikTok",
+        insta: "Official Instagram",
+        footer: "© 2026 LOUKA MUSIC — ALL RIGHTS RESERVED",
+        dayMode: "Day Mode",
+        nightMode: "Night Mode"
+      },
+      fr: {
+        overlay: "ENTRER DANS L'EXPÉRIENCE",
+        subtitle: "Violoniste Virtuose",
+        desc: "Performances exclusives de violon en direct, chefs-d'œuvre classiques et interprétations acoustiques élégantes.",
+        tiktok: "TikTok Officiel",
+        insta: "Instagram Officiel",
+        footer: "© 2026 LOUKA MUSIC — TOUS DROITS RÉSERVÉS",
+        dayMode: "Mode Jour",
+        nightMode: "Mode Nuit"
+      },
+      ar: {
+        overlay: "دخول التجربة",
+        subtitle: "عازف كمان متميز",
+        desc: "عروض كمان حية ومتميزة، معزوفات كلاسيكية وتوزيعات صوتية راقية لأرقى المناسبات.",
+        tiktok: "التيك توك الرسمي",
+        insta: "الإنستغرام الرسمي",
+        footer: "© 2026 موسيقى لوكا — جميع الحقوق محفوظة",
+        dayMode: "وضع النهار",
+        nightMode: "وضع الليل"
+      }
+    };
+
+    let currentLang = 'en';
+
+    function changeLanguage(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+
+      // Update text contents
+      document.getElementById('txt-overlay').innerText = t.overlay;
+      document.getElementById('txt-subtitle').innerText = t.subtitle;
+      document.getElementById('txt-desc').innerText = t.desc;
+      document.getElementById('txt-tiktok').innerText = t.tiktok;
+      document.getElementById('txt-insta').innerText = t.insta;
+      document.getElementById('txt-footer').innerText = t.footer;
+
+      // Update direction for Arabic (RTL)
+      if (lang === 'ar') {
+        htmlRoot.setAttribute('dir', 'rtl');
+        htmlRoot.setAttribute('lang', 'ar');
+      } else {
+        htmlRoot.setAttribute('dir', 'ltr');
+        htmlRoot.setAttribute('lang', lang);
+      }
+
+      // Update theme text based on active language
+      const isLight = document.body.classList.contains('light-theme');
+      themeText.innerText = isLight ? t.dayMode : t.nightMode;
+    }
+
+    // --- AUTOMATIC THEME SYSTEM ---
     function applyAutoTheme() {
       const currentHour = new Date().getHours();
-      // Daytime is between 06:00 and 18:00
       const isDaytime = currentHour >= 6 && currentHour < 18;
+      const t = translations[currentLang];
       
       if (isDaytime) {
         document.body.classList.add('light-theme');
         themeIcon.className = 'fa-solid fa-sun';
-        themeText.innerText = 'Day Mode';
+        themeText.innerText = t.dayMode;
       } else {
         document.body.classList.remove('light-theme');
         themeIcon.className = 'fa-solid fa-moon';
-        themeText.innerText = 'Night Mode';
+        themeText.innerText = t.nightMode;
       }
     }
 
-    // Manual Override Toggle
     function toggleTheme() {
       document.body.classList.toggle('light-theme');
       const isLight = document.body.classList.contains('light-theme');
+      const t = translations[currentLang];
       themeIcon.className = isLight ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-      themeText.innerText = isLight ? 'Day Mode' : 'Night Mode';
+      themeText.innerText = isLight ? t.dayMode : t.nightMode;
     }
 
-    // Run auto theme on load
     applyAutoTheme();
 
     // Volume Control
